@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>75 Anos - Nilda & Clóvis | Álbum de Memórias</title>
+    <!-- Importando Tailwind CSS para um design moderno e elegante -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500&display=swap');
+        
+        .font-serif-custom { font-family: 'Cormorant Garamond', serif; }
+        .font-sans-custom { font-family: 'Montserrat', sans-serif; }
+        .bg-offwhite { background-color: #FAF9F6; }
+        .text-gold { color: #C5A059; }
+        .bg-gold { background-color: #C5A059; }
+        .border-gold { border-color: #C5A059; }
+    </style>
+</head>
+<body class="bg-offwhite font-sans-custom text-gray-800 antialiased selection:bg-gold selection:text-white">
+
+    <!-- CABEÇALHO / HERO COM OS NOMES DOS PAIS -->
+    <header class="py-16 px-4 text-center border-b border-gold/20">
+        <span class="text-gold uppercase tracking-widest text-sm font-medium">Bodas de Diamante & Celebração da Vida</span>
+        <h1 class="font-serif-custom text-5xl md:text-6xl text-gray-900 mt-2 mb-4 font-semibold italic">Nilda & Clóvis</h1>
+        <p class="text-gray-600 max-w-xl mx-auto font-light text-lg">
+            75 anos de histórias, amor e cumplicidade. Envie o seu registro favorito direto do celular para eternizar este momento conosco.
+        </p>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 py-12">
+        
+        <!-- SEÇÃO DO QR CODE E CADASTRO RÁPIDO PARA CONVIDADOS -->
+        <section class="bg-white p-8 rounded-2xl shadow-sm border border-gold/30 mb-16 grid md:grid-cols-2 gap-8 items-center">
+            <div>
+                <span class="bg-gold/10 text-gold text-xs px-3 py-1 rounded-full font-medium">Acesso via Celular</span>
+                <h2 class="font-serif-custom text-3xl font-semibold mt-3 mb-2 text-gray-900">Envie sua Foto</h2>
+                <p class="text-gray-600 text-sm mb-6">
+                    Selecione uma foto da sua galeria ou tire na hora com a câmera para enviar ao nosso mural.
+                </p>
+                <form id="formCadastro" class="space-y-4">
+                    <input type="text" id="nomeConvidado" placeholder="Seu Nome Completo" required class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-gold text-sm">
+                    <input type="text" id="relacaoConvidado" placeholder="Parentesco ou Amizade (ex: Filho, Amigo de infância)" required class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-gold text-sm">
+                    
+                    <!-- CAMPO DE ARQUIVO: Abre a câmera ou galeria do smartphone -->
+                    <div class="relative border border-gray-200 rounded-lg p-3 bg-gray-50 text-sm">
+                        <label class="block text-gray-500 mb-1 text-xs font-medium">Escolha a foto do seu dispositivo:</label>
+                        <input type="file" id="arquivoFoto" accept="image/*" required class="w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-gold/10 file:text-gold hover:file:bg-gold/20 cursor-pointer">
+                    </div>
+
+                    <textarea id="mensagemFoto" placeholder="Deixe uma mensagem carinhosa para a Nilda e o Clóvis..." rows="2" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-gold text-sm"></textarea>
+                    
+                    <button type="submit" class="w-full bg-gold text-white py-3 rounded-lg font-medium tracking-wide hover:bg-amber-700 transition duration-300 shadow-md">
+                        Enviar para Conferência
+                    </button>
+                </form>
+            </div>
+            
+            <div class="flex flex-col items-center justify-center bg-offwhite p-6 rounded-xl border border-dashed border-gold/40 text-center">
+                <!-- Simulação de QR Code Elegante -->
+                <div class="bg-white p-4 rounded-lg shadow-sm mb-4">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://nilda-clovis-75anos.netlify.app" alt="QR Code do Álbum" class="w-40 h-40 mx-auto">
+                </div>
+                <h3 class="font-serif-custom text-xl font-medium text-gray-800">Aponte a câmera do celular</h3>
+                <p class="text-xs text-gray-500 mt-1">Participe do álbum digital instantaneamente através do QR Code da festa.</p>
+            </div>
+        </section>
+
+        <!-- MURAL / GALERIA PÚBLICA DE FOTOS APROVADAS -->
+        <section>
+            <div class="text-center mb-10">
+                <h2 class="font-serif-custom text-4xl text-gray-900 italic">Mural de Memórias</h2>
+                <p class="text-gray-500 text-sm mt-1">Momentos inesquecíveis capturados por quem amamos.</p>
+            </div>
+
+            <!-- Grade de Fotos Estilo Polaroid -->
+            <div id="muralGaleria" class="grid sm:grid-cols-2 md:grid-cols-3 gap-8">
+                <!-- Exemplo Estático Inicial de Demonstração -->
+                <div class="bg-white p-4 pb-6 rounded-xl shadow-sm border border-gray-100 transition transform hover:-translate-y-1 duration-300">
+                    <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4">
+                        <img src="https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&w=600&q=80" alt="Exemplo" class="w-full h-full object-cover">
+                    </div>
+                    <p class="font-serif-custom text-lg text-gray-800 italic mb-1">"Que alegria comemorar os 75 anos da Nilda e do Clóvis ao lado de vocês!"</p>
+                    <span class="text-xs text-gold uppercase tracking-wider font-semibold">— Família Silveira</span>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- RODAPÉ -->
+    <footer class="text-center py-8 text-xs text-gray-400 border-t border-gold/10 mt-20">
+        Feito com todo amor e TypeScript para os 75 anos de Nilda & Clóvis &copy; 2026
+    </footer>
+
+    <!-- SCRIPT DE INTERATIVIDADE PARA LEITURA DA FOTO DO SMARTPHONE -->
+    <script>
+        const formCadastro = document.getElementById('formCadastro');
+        const muralGaleria = document.getElementById('muralGaleria');
+
+        formCadastro.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const nome = document.getElementById('nomeConvidado').value;
+            const inputArquivo = document.getElementById('arquivoFoto');
+            const mensagem = document.getElementById('mensagemFoto').value;
+
+            if (inputArquivo.files && inputArquivo.files[0]) {
+                const leitor = new FileReader();
+
+                leitor.onload = function(eLeitor) {
+                    const urlImagemLocal = eLeitor.target.result;
+
+                    const novoCard = document.createElement('div');
+                    novoCard.className = "bg-white p-4 pb-6 rounded-xl shadow-sm border border-gray-100 transition transform hover:-translate-y-1 duration-300";
+                    novoCard.innerHTML = `
+                        <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4">
+                            <img src="${urlImagemLocal}" alt="Foto enviada" class="w-full h-full object-cover">
+                        </div>
+                        <p class="font-serif-custom text-lg text-gray-800 italic mb-1">"${mensagem}"</p>
+                        <span class="text-xs text-gold uppercase tracking-wider font-semibold">— ${nome} (Pendente moderação)</span>
+                    `;
+
+                    muralGaleria.prepend(novoCard);
+                    alert("Foto enviada com sucesso do seu dispositivo! Ela passará pela conferência dos organizadores.");
+                    formCadastro.reset();
+                };
+
+                leitor.readAsDataURL(inputArquivo.files[0]);
+            }
+        });
+    </script>
+</body>
+</html>
