@@ -116,9 +116,126 @@
       </div>
 
       <button type="submit" id="btnEnviar">Enviar Fotografia</button>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aniversário 76 Anos - Nilda & Clóvis</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #fcf8f2;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .container {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      max-width: 500px;
+      width: 100%;
+      margin-top: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #bfa15f;
+      margin-bottom: 5px;
+    }
+    p.subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 25px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #444;
+    }
+    input[type="text"], select, textarea, input[type="file"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+    textarea {
+      resize: vertical;
+      height: 100px;
+    }
+    button, .btn-galeria {
+      background-color: #bfa15f;
+      color: white;
+      border: none;
+      padding: 14px;
+      width: 100%;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+      box-sizing: border-box;
+    }
+    button:hover, .btn-galeria:hover {
+      background-color: #a68b4f;
+    }
+    .btn-galeria {
+      background-color: #6c757d;
+      margin-top: 15px;
+    }
+    .btn-galeria:hover {
+      background-color: #5a6268;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>76 Anos Nilda & Clóvis</h1>
+    <p class="subtitle">Partilhe connosco um momento especial da festa!</p>
+
+    <form id="formFoto" onsubmit="enviarFoto(event)">
+      <div class="form-group">
+        <label for="nomeInput">O seu Nome:</label>
+        <input type="text" id="nomeInput" required placeholder="Ex: Maria Silva">
+      </div>
+
+      <div class="form-group">
+        <label for="relacaoInput">Qual a sua relação com os homenageados?</label>
+        <select id="relacaoInput" required>
+          <option value="">Selecione...</option>
+          <option value="Familiar">Familiar</option>
+          <option value="Amigo(a)">Amigo(a)</option>
+          <option value="Convidado(a)">Convidado(a)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="mensagemInput">Mensagem de parabéns:</label>
+        <textarea id="mensagemInput" placeholder="Deixe uma mensagem carinhosa..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="fotoInput">Selecione a Fotografia:</label>
+        <input type="file" id="fotoInput" accept="image/*" required>
+      </div>
+
+      <button type="submit" id="btnEnviar">Enviar Fotografia</button>
     </form>
 
-    <!-- Botão para aceder à Galeria de Fotos Aprovadas -->
     <a href="galeria.html" class="btn-galeria">Ver Álbum da Festa</a>
   </div>
 
@@ -127,7 +244,6 @@
 
     const SUPABASE_URL = 'https://gfoawsiqxnkszlgmtmrl.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_7Zq0QtvSeiXAZsOCIOptNw_rdeqzR8w';
-
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     async function enviarFoto(event) {
@@ -143,15 +259,14 @@
       const mensagem = document.getElementById('mensagemInput').value;
 
       if (!arquivoInput) {
-        alert("Por favor, selecione uma foto da galeria!");
+        alert("Por favor, selecione uma foto!");
         btn.innerText = "Enviar Fotografia";
         btn.disabled = false;
         return;
       }
 
-      // 1. Enviar a imagem para o Storage (bucket: imagens-festa)
       const nomeArquivo = `${Date.now()}_${arquivoInput.name}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('imagens-festa')
         .upload(nomeArquivo, arquivoInput);
 
@@ -162,14 +277,12 @@
         return;
       }
 
-      // 2. Obter a URL pública da imagem enviada
       const { data: urlData } = supabase.storage
         .from('imagens-festa')
         .getPublicUrl(nomeArquivo);
 
       const urlImagem = urlData.publicUrl;
 
-      // 3. Salvar os dados na tabela 'fotos' com status PENDENTE
       const { error: dbError } = await supabase
         .from('fotos')
         .insert([
