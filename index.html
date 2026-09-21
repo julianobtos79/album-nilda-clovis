@@ -37,17 +37,27 @@
       color: #666;
       margin-bottom: 20px;
     }
-    /* Estilo do contador público no index */
-    .contador-publico {
+    /* Estilos dos contadores no index */
+    .contadores-box {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .contador-card {
+      flex: 1;
       background-color: #fdf8ed;
       border: 1px solid #e6d3a3;
       color: #8a7335;
       padding: 10px;
       border-radius: 8px;
       text-align: center;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: bold;
-      margin-bottom: 20px;
+    }
+    .contador-card span {
+      display: block;
+      font-size: 16px;
+      margin-top: 4px;
     }
     .form-group {
       margin-bottom: 20px;
@@ -119,9 +129,16 @@
     <h1>76 Anos Nilda & Clóvis</h1>
     <p class="subtitle">Partilhe connosco um momento especial da festa!</p>
 
-    <!-- Contador de fotos aprovadas na galeria -->
-    <div class="contador-publico">
-      📸 Memórias já no álbum: <span id="contadorAprovadas">0</span>
+    <!-- Caixas com os dois contadores (Aprovadas e Para Aprovar) -->
+    <div class="contadores-box">
+      <div class="contador-card">
+        📸 No Álbum
+        <span id="contadorAprovadas">0</span>
+      </div>
+      <div class="contador-card">
+        ⏳ Para Aprovar
+        <span id="contadorPendentes">0</span>
+      </div>
     </div>
 
     <form id="formFoto" onsubmit="enviarFoto(event)">
@@ -167,19 +184,25 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_7Zq0QtvSeiXAZsOCIOptNw_rdeqzR8w';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Função para buscar o número de fotos aprovadas
-    async function carregarContadorAprovadas() {
-      const { count, error } = await supabase
+    // Função para buscar os contadores do Supabase
+    async function carregarContadoresPublicos() {
+      // Conta as aprovadas
+      const { count: countAprovadas } = await supabase
         .from('fotos')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'APROVADO');
 
-      if (!error) {
-        const elemento = document.getElementById('contadorAprovadas');
-        if (elemento) {
-          elemento.innerText = count || 0;
-        }
-      }
+      const elAprovadas = document.getElementById('contadorAprovadas');
+      if (elAprovadas) elAprovadas.innerText = countAprovadas || 0;
+
+      // Conta as pendentes (para aprovar)
+      const { count: countPendentes } = await supabase
+        .from('fotos')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'PENDENTE');
+
+      const elPendentes = document.getElementById('contadorPendentes');
+      if (elPendentes) elPendentes.innerText = countPendentes || 0;
     }
 
     async function enviarFoto(event) {
@@ -230,6 +253,8 @@
       } else {
         alert("Foto enviada com sucesso! Aguardando moderação.");
         document.getElementById('formFoto').reset();
+        // Atualiza os contadores na hora após o envio
+        carregarContadoresPublicos();
       }
 
       btn.innerText = "Enviar Fotografia";
@@ -239,7 +264,7 @@
     window.enviarFoto = enviarFoto;
 
     // Executa ao carregar a página
-    carregarContadorAprovadas();
+    carregarContadoresPublicos();
   </script>
 
 </body>
