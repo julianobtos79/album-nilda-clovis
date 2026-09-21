@@ -1,34 +1,231 @@
-<script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Moderação - 76 Anos Nilda & Clóvis</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #fcf8f2;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .container {
+      max-width: 800px;
+      width: 100%;
+    }
+    h1 {
+      text-align: center;
+      color: #bfa15f;
+      margin-bottom: 5px;
+    }
+    p.subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 25px;
+    }
+    #loginBox {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      max-width: 400px;
+      width: 100%;
+      margin: 40px auto;
+      text-align: center;
+    }
+    #loginBox input {
+      width: 100%;
+      padding: 12px;
+      margin: 15px 0;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    #loginBox button, .btn-acao {
+      background-color: #bfa15f;
+      color: white;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #loginBox button:hover, .btn-acao:hover {
+      background-color: #a68b4f;
+    }
+    #adminPainel {
+      display: none;
+      width: 100%;
+    }
+    .foto-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    .foto-card img {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .foto-info {
+      flex-grow: 1;
+    }
+    .foto-info p {
+      margin: 5px 0;
+    }
+    .botoes-acao {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .btn-aprovar {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-aprovar:hover { background-color: #218838; }
+    .btn-rejeitar {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-rejeitar:hover { background-color: #c82333; }
+    .sem-pendentes {
+      text-align: center;
+      color: #888;
+      padding: 40px;
+      background: #fff;
+      border-radius: 10px;
+    }
+    .voltar-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: #bfa15f;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
 
-  // Proteção de acesso com a senha correta (incluindo os dois asteriscos)
-  const senhaCorreta = "Laurita0308**";
-  const senhaDigitada = prompt("Digite a senha de acesso ao Painel de Moderação:");
+  <div class="container">
+    <div id="loginBox">
+      <h2>Painel de Moderação</h2>
+      <p>Introduza a palavra-passe de administrador</p>
+      <input type="password" id="senhaInput" placeholder="Palavra-passe">
+      <button onclick="fazerLogin()">Entrar</button>
+    </div>
 
-  if (senhaDigitada !== senhaCorreta) {
-      alert("Senha incorreta! Acesso negado.");
-      document.body.innerHTML = "<h2 style='text-align:center; margin-top:50px; font-family:sans-serif;'>Acesso Restrito.</h2>";
-      throw new Error("Acesso não autorizado.");
-  }
+    <div id="adminPainel">
+      <a href="index.html" class="voltar-link">&larr; Ir para o site principal</a>
+      <h1>Moderação de Fotografias</h1>
+      <p class="subtitle">Aprove ou rejeite as fotos enviadas para os 76 Anos de Nilda & Clóvis</p>
 
-  const SUPABASE_URL = 'https://gfoawsiqxnkszlgmtmrl.supabase.co';
-  const SUPABASE_ANON_KEY = 'sb_publishable_7Zq0QtvSeiXAZsOCIOptNw_rdeqzR8w';
+      <div id="listaPendentes">
+        <p style="text-align: center;">A carregar fotografias pendentes...</p>
+      </div>
+    </div>
+  </div>
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-  async function carregarFotosPendentes() {
-    const { data, error } = await supabase
-      .from('fotos')
-      .select('*')
-      .eq('status', 'PENDENTE');
+    const SUPABASE_URL = 'https://gfoawsiqxnkszlgmtmrl.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_7Zq0QtvSeiXAZsOCIOptNw_rdeqzR8w';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    const SENHA_ADMIN = "Laurita0308**";
 
-    if (error) {
-      console.error("Erro ao carregar fotos:", error.message);
-      return;
+    window.fazerLogin = function() {
+      const senhaDigitada = document.getElementById('senhaInput').value;
+      if (senhaDigitada === SENHA_ADMIN) {
+        document.getElementById('loginBox').style.display = 'none';
+        document.getElementById('adminPainel').style.display = 'block';
+        carregarFotosPendentes();
+      } else {
+        alert("Palavra-passe incorreta!");
+      }
     }
 
-    console.log("Fotos pendentes carregadas:", data);
-  }
+    async function carregarFotosPendentes() {
+      const container = document.getElementById('listaPendentes');
 
-  carregarFotosPendentes();
-</script>
+      const { data: fotos, error } = await supabase
+        .from('fotos')
+        .select('*')
+        .eq('status', 'PENDENTE')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        container.innerHTML = `<p style="text-align:center; color:red;">Erro ao carregar: ${error.message}</p>`;
+        return;
+      }
+
+      if (!fotos || fotos.length === 0) {
+        container.innerHTML = `<div class="sem-pendentes">Não existem fotografias pendentes de moderação de momento.</div>`;
+        return;
+      }
+
+      container.innerHTML = '';
+      fotos.forEach(foto => {
+        const card = document.createElement('div');
+        card.className = 'foto-card';
+        card.innerHTML = `
+          <img src="${foto.url_imagem}" alt="Foto enviada">
+          <div class="foto-info">
+            <p><strong>Autor:</strong> ${escapeHtml(foto.nome_autor)}</p>
+            <p><strong>Relação:</strong> ${escapeHtml(foto.relacao || 'Não especificada')}</p>
+            <p><strong>Mensagem:</strong> ${foto.mensagem ? escapeHtml(foto.mensagem) : '<i>Sem mensagem</i>'}</p>
+            <div class="botoes-acao">
+              <button class="btn-aprovar" onclick="atualizarStatus('${foto.id}', 'APROVADO')">Aprovar</button>
+              <button class="btn-rejeitar" onclick="atualizarStatus('${foto.id}', 'REJEITADO')">Rejeitar</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    window.atualizarStatus = async function(id, novoStatus) {
+      const { error } = await supabase
+        .from('fotos')
+        .update({ status: novoStatus })
+        .eq('id', id);
+
+      if (error) {
+        alert("Erro ao atualizar o status: " + error.message);
+      } else {
+        carregarFotosPendentes();
+      }
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+  </script>
+
+</body>
+</html>

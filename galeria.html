@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Álbum da Festa - 76 Anos Nilda & Clóvis</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #fcf8f2;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .container {
+      max-width: 900px;
+      width: 100%;
+    }
+    h1 {
+      text-align: center;
+      color: #bfa15f;
+      margin-bottom: 5px;
+    }
+    p.subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+    }
+    .voltar-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: #bfa15f;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .voltar-link:hover {
+      text-decoration: underline;
+    }
+    .galeria-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: #ffffff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+    }
+    .card img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+    }
+    .card-content {
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+    .card-content p {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      color: #555;
+    }
+    .autor {
+      font-weight: bold;
+      color: #333;
+    }
+    .relacao {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 8px;
+    }
+    .sem-fotos {
+      text-align: center;
+      grid-column: 1 / -1;
+      color: #888;
+      padding: 40px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <a href="index.html" class="voltar-link">&larr; Voltar para a página de envio</a>
+    <h1>Álbum de Memórias</h1>
+    <p class="subtitle">Momentos especiais partilhados na festa de 76 Anos de Nilda & Clóvis</p>
+
+    <div id="galeriaGrid" class="galeria-grid">
+      <div class="sem-fotos">A carregar fotografias...</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+    const SUPABASE_URL = 'https://gfoawsiqxnkszlgmtmrl.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_7Zq0QtvSeiXAZsOCIOptNw_rdeqzR8w';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function carregarGaleria() {
+      const grid = document.getElementById('galeriaGrid');
+
+      const { data: fotos, error } = await supabase
+        .from('fotos')
+        .select('*')
+        .eq('status', 'APROVADO')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        grid.innerHTML = `<div class="sem-fotos">Erro ao carregar o álbum: ${error.message}</div>`;
+        return;
+      }
+
+      if (!fotos || fotos.length === 0) {
+        grid.innerHTML = `<div class="sem-fotos">Ainda não existem fotografias aprovadas no álbum. Volte em breve!</div>`;
+        return;
+      }
+
+      grid.innerHTML = '';
+      fotos.forEach(foto => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <img src="${foto.url_imagem}" alt="Foto da Festa">
+          <div class="card-content">
+            <span class="autor">${escapeHtml(foto.nome_autor)}</span>
+            <span class="relacao">${escapeHtml(foto.relacao || 'Convidado(a)')}</span>
+            <p>${foto.mensagem ? escapeHtml(foto.mensagem) : ''}</p>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    carregarGaleria();
+  </script>
+
+</body>
+</html>
