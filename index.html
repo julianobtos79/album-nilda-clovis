@@ -14,6 +14,9 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+      justify-content: space-between;
     }
     .container {
       background: #ffffff;
@@ -81,13 +84,29 @@
     .btn-galeria:hover {
       background-color: #5a6268;
     }
+    /* Estilo para o link discreto de administração */
+    .admin-footer {
+      text-align: center;
+      margin-top: 20px;
+      padding-bottom: 10px;
+    }
+    .admin-footer a {
+      color: #aaa;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .admin-footer a:hover {
+      color: #666;
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
 
   <div class="container">
     <h1>76 Anos Nilda & Clóvis</h1>
-    <p class="subtitle">Partilhe conosco um momento especial da festa!</p>
+    <p class="subtitle">Partilhe connosco um momento especial da festa!</p>
 
     <form id="formFoto" onsubmit="enviarFoto(event)">
       <div class="form-group">
@@ -101,6 +120,7 @@
           <option value="">Selecione...</option>
           <option value="Familiar">Familiar</option>
           <option value="Amigo(a)">Amigo(a)</option>
+          <option value="Convidado(a)">Convidado(a)</option>
         </select>
       </div>
 
@@ -118,6 +138,11 @@
     </form>
 
     <a href="galeria.html" class="btn-galeria">Ver Álbum da Festa</a>
+  </div>
+
+  <!-- Acesso discreto para o painel de administração -->
+  <div class="admin-footer">
+    <a href="admin.html">⚙️ Painel de Administração</a>
   </div>
 
   <script type="module">
