@@ -58,6 +58,19 @@
       resize: vertical;
       height: 100px;
     }
+    /* Estilo da caixa de pré-visualização da foto */
+    #previewContainer {
+      display: none;
+      margin-top: 10px;
+      text-align: center;
+    }
+    #previewImg {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      object-fit: contain;
+    }
     button, .btn-galeria-container {
       width: 100%;
     }
@@ -89,14 +102,12 @@
     .btn-galeria:hover {
       background-color: #5a6268;
     }
-    /* Contador discreto ao lado do botão da galeria */
     .contador-galeria-discreto {
       text-align: center;
       font-size: 12px;
       color: #777;
       margin-top: 5px;
     }
-    /* Rodapé e contador de pendentes discreto */
     .admin-footer {
       text-align: center;
       margin-top: 25px;
@@ -148,7 +159,13 @@
 
       <div class="form-group">
         <label for="fotoInput">Selecione a Fotografia:</label>
-        <input type="file" id="fotoInput" accept="image/*" required>
+        <input type="file" id="fotoInput" accept="image/*" required onchange="mostrarPreview(event)">
+        
+        <!-- Área onde a foto aparece antes do envio -->
+        <div id="previewContainer">
+          <p style="font-size: 12px; color: #666; margin: 5px 0;">Pré-visualização:</p>
+          <img id="previewImg" src="" alt="Pré-visualização da foto">
+        </div>
       </div>
 
       <button type="submit" id="btnEnviar">Enviar Fotografia</button>
@@ -176,9 +193,26 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_7Zq0QtvSeiXAZsOCIOptNw_rdeqzR8w';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Função para buscar e atualizar os contadores discretos
+    // Função para mostrar a imagem selecionada na tela antes de enviar
+    window.mostrarPreview = function(event) {
+      const file = event.target.files[0];
+      const previewContainer = document.getElementById('previewContainer');
+      const previewImg = document.getElementById('previewImg');
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          previewImg.src = e.target.result;
+          previewContainer.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+      } else {
+        previewImg.src = '';
+        previewContainer.style.display = 'none';
+      }
+    }
+
     async function carregarContadoresDiscretos() {
-      // Conta as aprovadas (galeria)
       const { count: countAprovadas } = await supabase
         .from('fotos')
         .select('*', { count: 'exact', head: true })
@@ -187,7 +221,6 @@
       const elAprovadas = document.getElementById('contadorAprovadas');
       if (elAprovadas) elAprovadas.innerText = countAprovadas || 0;
 
-      // Conta as pendentes (para aprovar)
       const { count: countPendentes } = await supabase
         .from('fotos')
         .select('*', { count: 'exact', head: true })
@@ -245,6 +278,7 @@
       } else {
         alert("Foto enviada com sucesso! Aguardando moderação.");
         document.getElementById('formFoto').reset();
+        document.getElementById('previewContainer').style.display = 'none';
         carregarContadoresDiscretos();
       }
 
@@ -254,7 +288,6 @@
 
     window.enviarFoto = enviarFoto;
 
-    // Executa ao carregar a página
     carregarContadoresDiscretos();
   </script>
 
