@@ -55,7 +55,7 @@
       resize: vertical;
       height: 100px;
     }
-    button {
+    button, .btn-galeria {
       background-color: #bfa15f;
       color: white;
       border: none;
@@ -66,9 +66,20 @@
       font-weight: bold;
       cursor: pointer;
       transition: background 0.3s;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+      box-sizing: border-box;
     }
-    button:hover {
+    button:hover, .btn-galeria:hover {
       background-color: #a68b4f;
+    }
+    .btn-galeria {
+      background-color: #6c757d;
+      margin-top: 15px;
+    }
+    .btn-galeria:hover {
+      background-color: #5a6268;
     }
   </style>
 </head>
@@ -106,6 +117,9 @@
 
       <button type="submit" id="btnEnviar">Enviar Fotografia</button>
     </form>
+
+    <!-- Botão para aceder à Galeria de Fotos Aprovadas -->
+    <a href="galeria.html" class="btn-galeria">Ver Álbum da Festa</a>
   </div>
 
   <script type="module">
