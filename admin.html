@@ -61,6 +61,28 @@
     #loginBox button:hover, .btn-acao:hover {
       background-color: #a68b4f;
     }
+    /* Estilo do Alerta de Lote */
+    .alerta-lote {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-size: 14px;
+      font-weight: bold;
+      display: none;
+    }
+    .alerta-padrao {
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-size: 14px;
+      display: none;
+    }
     #adminPainel {
       display: none;
       width: 100%;
@@ -133,6 +155,8 @@
   <div class="container">
     <div id="loginBox">
       <h2>Painel de Moderação</h2>
+      <div id="avisoLote" class="alerta-lote"></div>
+      <div id="avisoPadrao" class="alerta-padrao"></div>
       <p>Introduza a palavra-passe de administrador</p>
       <input type="password" id="senhaInput" placeholder="Palavra-passe">
       <button onclick="fazerLogin()">Entrar</button>
@@ -158,8 +182,29 @@
     
     const SENHA_ADMIN = "Laurita0308**";
 
+    async function verificarLotePendentes() {
+      const { count, error } = await supabase
+        .from('fotos')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'PENDENTE');
+
+      if (!error && count > 0) {
+        const avisoLote = document.getElementById('avisoLote');
+        const avisoPadrao = document.getElementById('avisoPadrao');
+
+        // Verifica se atingiu marcas importantes (10, 20, 30...)
+        if (count >= 10) {
+          avisoLote.innerHTML = `🎉 Atenção! Já acumulou um lote de ${count} fotos pendentes para aprovação!`;
+          avisoLote.style.display = 'block';
+        } else {
+          avisoPadrao.innerHTML = `⚠️ Existem ${count} foto(s) pendente(s) de moderação.`;
+          avisoPadrao.style.display = 'block';
+        }
+      }
+    }
+
     window.fazerLogin = function() {
-      const senhaDigitada = document.getElementById('senhaInput').value;
+      const senhaDigitada = document.getElementById('senhaInput'].value;
       if (senhaDigitada === SENHA_ADMIN) {
         document.getElementById('loginBox').style.display = 'none';
         document.getElementById('adminPainel').style.display = 'block';
@@ -218,6 +263,7 @@
         alert("Erro ao atualizar o status: " + error.message);
       } else {
         carregarFotosPendentes();
+        verificarLotePendentes(); // Reavalia a contagem após aprovar/rejeitar
       }
     }
 
@@ -225,6 +271,8 @@
       if (!text) return '';
       return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
+
+    verificarLotePendentes();
   </script>
 
 </body>
