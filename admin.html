@@ -1,0 +1,34 @@
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+  // Proteção de acesso com a senha correta (incluindo os dois asteriscos)
+  const senhaCorreta = "Laurita0308**";
+  const senhaDigitada = prompt("Digite a senha de acesso ao Painel de Moderação:");
+
+  if (senhaDigitada !== senhaCorreta) {
+      alert("Senha incorreta! Acesso negado.");
+      document.body.innerHTML = "<h2 style='text-align:center; margin-top:50px; font-family:sans-serif;'>Acesso Restrito.</h2>";
+      throw new Error("Acesso não autorizado.");
+  }
+
+  const SUPABASE_URL = 'https://gfoawsiqxnkszlgmtmrl.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_7Zq0QtvSeiXAZsOCIOptNw_rdeqzR8w';
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  async function carregarFotosPendentes() {
+    const { data, error } = await supabase
+      .from('fotos')
+      .select('*')
+      .eq('status', 'PENDENTE');
+
+    if (error) {
+      console.error("Erro ao carregar fotos:", error.message);
+      return;
+    }
+
+    console.log("Fotos pendentes carregadas:", data);
+  }
+
+  carregarFotosPendentes();
+</script>
