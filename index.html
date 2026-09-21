@@ -35,29 +35,7 @@
     p.subtitle {
       text-align: center;
       color: #666;
-      margin-bottom: 20px;
-    }
-    /* Estilos dos contadores no index */
-    .contadores-box {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .contador-card {
-      flex: 1;
-      background-color: #fdf8ed;
-      border: 1px solid #e6d3a3;
-      color: #8a7335;
-      padding: 10px;
-      border-radius: 8px;
-      text-align: center;
-      font-size: 13px;
-      font-weight: bold;
-    }
-    .contador-card span {
-      display: block;
-      font-size: 16px;
-      margin-top: 4px;
+      margin-bottom: 25px;
     }
     .form-group {
       margin-bottom: 20px;
@@ -80,6 +58,9 @@
       resize: vertical;
       height: 100px;
     }
+    button, .btn-galeria-container {
+      width: 100%;
+    }
     button, .btn-galeria {
       background-color: #bfa15f;
       color: white;
@@ -99,16 +80,26 @@
     button:hover, .btn-galeria:hover {
       background-color: #a68b4f;
     }
+    .btn-galeria-container {
+      margin-top: 15px;
+    }
     .btn-galeria {
       background-color: #6c757d;
-      margin-top: 15px;
     }
     .btn-galeria:hover {
       background-color: #5a6268;
     }
+    /* Contador discreto ao lado do botão da galeria */
+    .contador-galeria-discreto {
+      text-align: center;
+      font-size: 12px;
+      color: #777;
+      margin-top: 5px;
+    }
+    /* Rodapé e contador de pendentes discreto */
     .admin-footer {
       text-align: center;
-      margin-top: 20px;
+      margin-top: 25px;
       padding-bottom: 10px;
     }
     .admin-footer a {
@@ -121,6 +112,11 @@
       color: #666;
       text-decoration: underline;
     }
+    .contador-pendente-discreto {
+      font-size: 11px;
+      color: #999;
+      margin-bottom: 4px;
+    }
   </style>
 </head>
 <body>
@@ -128,18 +124,6 @@
   <div class="container">
     <h1>76 Anos Nilda & Clóvis</h1>
     <p class="subtitle">Partilhe connosco um momento especial da festa!</p>
-
-    <!-- Caixas com os dois contadores (Aprovadas e Para Aprovar) -->
-    <div class="contadores-box">
-      <div class="contador-card">
-        📸 No Álbum
-        <span id="contadorAprovadas">0</span>
-      </div>
-      <div class="contador-card">
-        ⏳ Para Aprovar
-        <span id="contadorPendentes">0</span>
-      </div>
-    </div>
 
     <form id="formFoto" onsubmit="enviarFoto(event)">
       <div class="form-group">
@@ -170,10 +154,18 @@
       <button type="submit" id="btnEnviar">Enviar Fotografia</button>
     </form>
 
-    <a href="galeria.html" class="btn-galeria">Ver Álbum da Festa</a>
+    <div class="btn-galeria-container">
+      <a href="galeria.html" class="btn-galeria">Ver Álbum da Festa</a>
+      <div class="contador-galeria-discreto">
+        (<span id="contadorAprovadas">0</span> fotos na galeria)
+      </div>
+    </div>
   </div>
 
   <div class="admin-footer">
+    <div class="contador-pendente-discreto">
+      (<span id="contadorPendentes">0</span> fotos aguardando aprovação)
+    </div>
     <a href="admin.html">⚙️ Painel de Administração</a>
   </div>
 
@@ -184,9 +176,9 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_7Zq0QtvSeiXAZsOCIOptNw_rdeqzR8w';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Função para buscar os contadores do Supabase
-    async function carregarContadoresPublicos() {
-      // Conta as aprovadas
+    // Função para buscar e atualizar os contadores discretos
+    async function carregarContadoresDiscretos() {
+      // Conta as aprovadas (galeria)
       const { count: countAprovadas } = await supabase
         .from('fotos')
         .select('*', { count: 'exact', head: true })
@@ -253,8 +245,7 @@
       } else {
         alert("Foto enviada com sucesso! Aguardando moderação.");
         document.getElementById('formFoto').reset();
-        // Atualiza os contadores na hora após o envio
-        carregarContadoresPublicos();
+        carregarContadoresDiscretos();
       }
 
       btn.innerText = "Enviar Fotografia";
@@ -264,7 +255,7 @@
     window.enviarFoto = enviarFoto;
 
     // Executa ao carregar a página
-    carregarContadoresPublicos();
+    carregarContadoresDiscretos();
   </script>
 
 </body>
