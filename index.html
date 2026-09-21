@@ -35,7 +35,19 @@
     p.subtitle {
       text-align: center;
       color: #666;
-      margin-bottom: 25px;
+      margin-bottom: 20px;
+    }
+    /* Estilo do contador público no index */
+    .contador-publico {
+      background-color: #fdf8ed;
+      border: 1px solid #e6d3a3;
+      color: #8a7335;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 20px;
     }
     .form-group {
       margin-bottom: 20px;
@@ -84,7 +96,6 @@
     .btn-galeria:hover {
       background-color: #5a6268;
     }
-    /* Estilo para o link discreto de administração */
     .admin-footer {
       text-align: center;
       margin-top: 20px;
@@ -107,6 +118,11 @@
   <div class="container">
     <h1>76 Anos Nilda & Clóvis</h1>
     <p class="subtitle">Partilhe connosco um momento especial da festa!</p>
+
+    <!-- Contador de fotos aprovadas na galeria -->
+    <div class="contador-publico">
+      📸 Memórias já no álbum: <span id="contadorAprovadas">0</span>
+    </div>
 
     <form id="formFoto" onsubmit="enviarFoto(event)">
       <div class="form-group">
@@ -140,7 +156,6 @@
     <a href="galeria.html" class="btn-galeria">Ver Álbum da Festa</a>
   </div>
 
-  <!-- Acesso discreto para o painel de administração -->
   <div class="admin-footer">
     <a href="admin.html">⚙️ Painel de Administração</a>
   </div>
@@ -151,6 +166,21 @@
     const SUPABASE_URL = 'https://gfoawsiqxnkszlgmtmrl.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_7Zq0QtvSeiXAZsOCIOptNw_rdeqzR8w';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Função para buscar o número de fotos aprovadas
+    async function carregarContadorAprovadas() {
+      const { count, error } = await supabase
+        .from('fotos')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'APROVADO');
+
+      if (!error) {
+        const elemento = document.getElementById('contadorAprovadas');
+        if (elemento) {
+          elemento.innerText = count || 0;
+        }
+      }
+    }
 
     async function enviarFoto(event) {
       event.preventDefault();
@@ -207,6 +237,9 @@
     }
 
     window.enviarFoto = enviarFoto;
+
+    // Executa ao carregar a página
+    carregarContadorAprovadas();
   </script>
 
 </body>
