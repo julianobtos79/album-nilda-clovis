@@ -192,7 +192,6 @@
         const avisoLote = document.getElementById('avisoLote');
         const avisoPadrao = document.getElementById('avisoPadrao');
 
-        // Verifica se atingiu marcas importantes (10, 20, 30...)
         if (count >= 10) {
           avisoLote.innerHTML = `🎉 Atenção! Já acumulou um lote de ${count} fotos pendentes para aprovação!`;
           avisoLote.style.display = 'block';
@@ -204,7 +203,7 @@
     }
 
     window.fazerLogin = function() {
-      const senhaDigitada = document.getElementById('senhaInput'].value;
+      const senhaDigitada = document.getElementById('senhaInput').value;
       if (senhaDigitada === SENHA_ADMIN) {
         document.getElementById('loginBox').style.display = 'none';
         document.getElementById('adminPainel').style.display = 'block';
@@ -263,7 +262,7 @@
         alert("Erro ao atualizar o status: " + error.message);
       } else {
         carregarFotosPendentes();
-        verificarLotePendentes(); // Reavalia a contagem após aprovar/rejeitar
+        verificarLotePendentes();
       }
     }
 
