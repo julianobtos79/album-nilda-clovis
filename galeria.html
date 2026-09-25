@@ -16,7 +16,6 @@
       color: #fff;
     }
 
-    /* Botão de voltar no canto superior */
     .top-bar {
       position: absolute;
       top: 20px;
@@ -51,7 +50,6 @@
       letter-spacing: 1px;
     }
 
-    /* Contentor do Carrossel */
     .carousel-container {
       display: flex;
       width: 100%;
@@ -63,10 +61,9 @@
     }
 
     .carousel-container::-webkit-scrollbar {
-      display: none; /* Esconde a barra de scroll */
+      display: none;
     }
 
-    /* Cada slide de foto ocupa a tela inteira */
     .carousel-slide {
       flex: 0 0 100%;
       width: 100%;
@@ -88,7 +85,6 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.8);
     }
 
-    /* Legenda elegante sobreposta na parte inferior da foto */
     .foto-overlay {
       position: absolute;
       bottom: 40px;
@@ -147,10 +143,26 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_7Zq0QtvSeiXAZsOCIOptNw_rdeqzR8w';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    // Função auxiliar para carregar a imagem e testar se é formato retrato
+    function verificarRetrato(foto) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.src = foto.url_imagem;
+        img.onload = () => {
+          // Retrato: Altura maior que a largura
+          if (img.naturalHeight > img.naturalWidth) {
+            resolve(foto);
+          } else {
+            resolve(null);
+          }
+        };
+        img.onerror = () => resolve(null); // Ignora se houver erro ao carregar o link
+      });
+    }
+
     async function carregarGaleriaCarrossel() {
       const container = document.getElementById('galeriaContainer');
 
-      // Puxa apenas as fotos aprovadas
       const { data: fotos, error } = await supabase
         .from('fotos')
         .select('*')
@@ -162,40 +174,35 @@
         return;
       }
 
+      // Valida todas as imagens em paralelo
+      const promessas = fotos.map(foto => verificarRetrato(foto));
+      const resultados = await Promise.all(promessas);
+      
+      // Filtra apenas os objetos válidos (que passaram na verificação de retrato)
+      const fotosRetrato = resultados.filter(item => item !== null);
+
+      if (fotosRetrato.length === 0) {
+        container.innerHTML = '<div class="sem-fotos"><h2>A aguardar fotografias em formato retrato.</h2><p>As fotos enviadas precisam de estar na vertical.</p></div>';
+        return;
+      }
+
       container.innerHTML = '';
-      let fotosValidasCount = 0;
 
-      fotos.forEach(foto => {
-        const imgTest = new Image();
-        imgTest.src = foto.url_imagem;
-
-        imgTest.onload = function() {
-          // Filtra estritamente para formato retrato (altura maior que largura)
-          if (imgTest.naturalHeight > imgTest.naturalWidth) {
-            fotosValidasCount++;
-
-            const slide = document.createElement('div');
-            slide.className = 'carousel-slide';
-            
-            slide.innerHTML = `
-              <img src="${foto.url_imagem}" alt="Foto de ${foto.nome_autor}">
-              <div class="foto-overlay">
-                <h3>${foto.nome_autor} <span style="font-weight: normal; font-size: 12px; color: #bfa15f;">(${foto.relacao})</span></h3>
-                ${foto.mensagem ? `<p>"${foto.mensagem}"</p>` : ''}
-              </div>
-            `;
-            
-            container.appendChild(slide);
-          }
-        };
+      // Monta os slides no carrossel
+      fotosRetrato.forEach(foto => {
+        const slide = document.createElement('div');
+        slide.className = 'carousel-slide';
+        
+        slide.innerHTML = `
+          <img src="${foto.url_imagem}" alt="Foto de ${foto.nome_autor}">
+          <div class="foto-overlay">
+            <h3>${foto.nome_autor} <span style="font-weight: normal; font-size: 12px; color: #bfa15f;">(${foto.relacao})</span></h3>
+            ${foto.mensagem ? `<p>"${foto.mensagem}"</p>` : ''}
+          </div>
+        `;
+        
+        container.appendChild(slide);
       });
-
-      // Caso nenhuma foto atenda ao critério após processar
-      setTimeout(() => {
-        if (fotosValidasCount === 0 && container.innerHTML === '') {
-          container.innerHTML = '<div class="sem-fotos"><h2>A aguardar fotografias em formato retrato.</h2></div>';
-        }
-      }, 2000);
     }
 
     carregarGaleriaCarrossel();
