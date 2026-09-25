@@ -1,64 +1,176 @@
-<script type="module">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galeria da Festa - 76 Anos Nilda & Clóvis</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #000000;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+      color: #fff;
+    }
+
+    .top-bar {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .btn-voltar {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-size: 14px;
+      backdrop-filter: blur(5px);
+    }
+
+    .titulo-topo {
+      font-size: 14px;
+      color: #bfa15f;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .carousel-container {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      overflow-x: scroll;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+    }
+
+    .carousel-slide {
+      flex: 0 0 100%;
+      width: 100%;
+      height: 100%;
+      scroll-snap-align: start;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      box-sizing: border-box;
+      padding: 70px 20px 40px 20px;
+    }
+
+    .carousel-slide img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    .foto-overlay {
+      position: absolute;
+      bottom: 30px;
+      left: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 12px 15px;
+      border-radius: 8px;
+      border-left: 4px solid #bfa15f;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .foto-overlay h3 {
+      margin: 0 0 4px 0;
+      font-size: 15px;
+    }
+
+    .foto-overlay p {
+      margin: 0;
+      font-size: 12px;
+      color: #ccc;
+    }
+
+    .mensagem-aviso {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      text-align: center;
+      color: #aaa;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <a href="index.html" class="btn-voltar">← Enviar Foto</a>
+    <div class="titulo-topo">Álbum 76 Anos</div>
+  </div>
+
+  <div id="galeriaContainer" class="carousel-container">
+    <div class="mensagem-aviso">A carregar galeria...</div>
+  </div>
+
+  <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
     const SUPABASE_URL = 'https://gfoawsiqxnkszlgmtmrl.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_7Zq0QtvSeiXAZsOCIOptNw_rdeqzR8w';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    async function carregarGaleriaCarrossel() {
+    async function iniciarGaleria() {
       const container = document.getElementById('galeriaContainer');
 
-      // Busca todas as fotos sem filtrar o status primeiro para sabermos o que existe
-      const { data: fotos, error } = await supabase
-        .from('fotos')
-        .select('*')
-        .order('criado_em', { ascending: false });
+      try {
+        const { data: fotos, error } = await supabase
+          .from('fotos')
+          .select('*')
+          .order('criado_em', { ascending: false });
 
-      if (error) {
-        container.innerHTML = `<div class="sem-fotos"><h2>Erro ao conectar à base de dados.</h2><p>${error.message}</p></div>`;
-        return;
+        if (error) {
+          container.innerHTML = `<div class="mensagem-aviso">Erro na base de dados:<br>${error.message}</div>`;
+          return;
+        }
+
+        if (!fotos || fotos.length === 0) {
+          container.innerHTML = `<div class="mensagem-aviso">Ainda não existem fotografias registadas.</div>`;
+          return;
+        }
+
+        container.innerHTML = '';
+
+        fotos.forEach(foto => {
+          const slide = document.createElement('div');
+          slide.className = 'carousel-slide';
+          
+          slide.innerHTML = `
+            <img src="${foto.url_imagem}" alt="Foto">
+            <div class="foto-overlay">
+              <h3>${foto.nome_autor || 'Convidado'} <span style="font-size: 11px; color: #bfa15f;">(${foto.relacao || ''})</span></h3>
+              ${foto.mensagem ? `<p>"${foto.mensagem}"</p>` : ''}
+            </div>
+          `;
+          
+          container.appendChild(slide);
+        });
+
+      } catch (err) {
+        container.innerHTML = `<div class="mensagem-aviso">Erro inesperado ao carregar:<br>${err.message}</div>`;
       }
-
-      if (!fotos || fotos.length === 0) {
-        container.innerHTML = '<div class="sem-fotos"><h2>A tabela está vazia.</h2><p>Nenhum registo encontrado na base de dados.</p></div>';
-        return;
-      }
-
-      // Filtra de forma flexível (aceita 'APROVADO', 'aprovado', etc., ou se o campo estiver vazio)
-      const fotosAprovadas = fotos.filter(f => {
-        if (!f.status) return true; // Se o campo status não estiver a ser usado, mostra tudo
-        const status = f.status.toUpperCase();
-        return status === 'APROVADO' || status === 'APROVADA';
-      });
-
-      if (fotosAprovadas.length === 0) {
-        container.innerHTML = `
-          <div class="sem-fotos" style="text-align: left; max-width: 400px;">
-            <h2>Existem fotos, mas nenhuma está aprovada!</h2>
-            <p>Total de fotos na base: ${fotos.length}</p>
-            <p>Vá ao <a href="admin.html" style="color: #bfa15f;">Painel de Administração</a> para aprovar as fotografias.</p>
-          </div>`;
-        return;
-      }
-
-      container.innerHTML = '';
-
-      // Renderiza as fotos aprovadas no carrossel
-      fotosAprovadas.forEach(foto => {
-        const slide = document.createElement('div');
-        slide.className = 'carousel-slide';
-        
-        slide.innerHTML = `
-          <img src="${foto.url_imagem}" alt="Foto de ${foto.nome_autor || 'Convidado'}">
-          <div class="foto-overlay">
-            <h3>${foto.nome_autor || 'Convidado'} <span style="font-weight: normal; font-size: 12px; color: #bfa15f;">(${foto.relacao || 'Festa'})</span></h3>
-            ${foto.mensagem ? `<p>"${foto.mensagem}"</p>` : ''}
-          </div>
-        `;
-        
-        container.appendChild(slide);
-      });
     }
 
-    carregarGaleriaCarrossel();
+    iniciarGaleria();
   </script>
+
+</body>
+</html>
