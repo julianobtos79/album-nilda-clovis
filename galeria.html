@@ -1,142 +1,4 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Galeria da Festa - 76 Anos Nilda & Clóvis</title>
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      background-color: #000000;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      overflow: hidden;
-      color: #fff;
-    }
-
-    .top-bar {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      right: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 10;
-    }
-
-    .btn-voltar {
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-      padding: 8px 16px;
-      border-radius: 20px;
-      text-decoration: none;
-      font-size: 14px;
-      backdrop-filter: blur(5px);
-      transition: background 0.3s;
-    }
-
-    .btn-voltar:hover {
-      background: rgba(255, 255, 255, 0.4);
-    }
-
-    .titulo-topo {
-      font-size: 14px;
-      color: #bfa15f;
-      font-weight: bold;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .carousel-container {
-      display: flex;
-      width: 100%;
-      height: 100%;
-      overflow-x: scroll;
-      scroll-snap-type: x mandatory;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .carousel-container::-webkit-scrollbar {
-      display: none;
-    }
-
-    .carousel-slide {
-      flex: 0 0 100%;
-      width: 100%;
-      height: 100%;
-      scroll-snap-align: start;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      box-sizing: border-box;
-      padding: 60px 20px 40px 20px;
-    }
-
-    .carousel-slide img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-      border-radius: 8px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-    }
-
-    .foto-overlay {
-      position: absolute;
-      bottom: 40px;
-      left: 30px;
-      right: 30px;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(8px);
-      padding: 15px 20px;
-      border-radius: 10px;
-      border-left: 4px solid #bfa15f;
-      max-width: 450px;
-      margin: 0 auto;
-      box-sizing: border-box;
-    }
-
-    .foto-overlay h3 {
-      margin: 0 0 5px 0;
-      font-size: 16px;
-      color: #fff;
-    }
-
-    .foto-overlay p {
-      margin: 0;
-      font-size: 13px;
-      color: #ddd;
-      font-style: italic;
-    }
-
-    .sem-fotos {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100%;
-      text-align: center;
-      color: #888;
-      padding: 20px;
-    }
-  </style>
-</head>
-<body>
-
-  <div class="top-bar">
-    <a href="index.html" class="btn-voltar">← Enviar Foto</a>
-    <div class="titulo-topo">Álbum 76 Anos</div>
-  </div>
-
-  <div id="galeriaContainer" class="carousel-container">
-    <div class="sem-fotos">A carregar momentos especiais...</div>
-  </div>
-
-  <script type="module">
+<script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
     const SUPABASE_URL = 'https://gfoawsiqxnkszlgmtmrl.supabase.co';
@@ -146,28 +8,50 @@
     async function carregarGaleriaCarrossel() {
       const container = document.getElementById('galeriaContainer');
 
+      // Busca todas as fotos sem filtrar o status primeiro para sabermos o que existe
       const { data: fotos, error } = await supabase
         .from('fotos')
         .select('*')
-        .eq('status', 'APROVADO')
         .order('criado_em', { ascending: false });
 
-      if (error || !fotos || fotos.length === 0) {
-        container.innerHTML = '<div class="sem-fotos"><h2>Ainda não há fotografias aprovadas.</h2><p>Seja o primeiro a enviar um momento da festa!</p></div>';
+      if (error) {
+        container.innerHTML = `<div class="sem-fotos"><h2>Erro ao conectar à base de dados.</h2><p>${error.message}</p></div>`;
+        return;
+      }
+
+      if (!fotos || fotos.length === 0) {
+        container.innerHTML = '<div class="sem-fotos"><h2>A tabela está vazia.</h2><p>Nenhum registo encontrado na base de dados.</p></div>';
+        return;
+      }
+
+      // Filtra de forma flexível (aceita 'APROVADO', 'aprovado', etc., ou se o campo estiver vazio)
+      const fotosAprovadas = fotos.filter(f => {
+        if (!f.status) return true; // Se o campo status não estiver a ser usado, mostra tudo
+        const status = f.status.toUpperCase();
+        return status === 'APROVADO' || status === 'APROVADA';
+      });
+
+      if (fotosAprovadas.length === 0) {
+        container.innerHTML = `
+          <div class="sem-fotos" style="text-align: left; max-width: 400px;">
+            <h2>Existem fotos, mas nenhuma está aprovada!</h2>
+            <p>Total de fotos na base: ${fotos.length}</p>
+            <p>Vá ao <a href="admin.html" style="color: #bfa15f;">Painel de Administração</a> para aprovar as fotografias.</p>
+          </div>`;
         return;
       }
 
       container.innerHTML = '';
 
-      // Renderiza todas as fotos aprovadas diretamente no carrossel
-      fotos.forEach(foto => {
+      // Renderiza as fotos aprovadas no carrossel
+      fotosAprovadas.forEach(foto => {
         const slide = document.createElement('div');
         slide.className = 'carousel-slide';
         
         slide.innerHTML = `
-          <img src="${foto.url_imagem}" alt="Foto de ${foto.nome_autor}">
+          <img src="${foto.url_imagem}" alt="Foto de ${foto.nome_autor || 'Convidado'}">
           <div class="foto-overlay">
-            <h3>${foto.nome_autor} <span style="font-weight: normal; font-size: 12px; color: #bfa15f;">(${foto.relacao})</span></h3>
+            <h3>${foto.nome_autor || 'Convidado'} <span style="font-weight: normal; font-size: 12px; color: #bfa15f;">(${foto.relacao || 'Festa'})</span></h3>
             ${foto.mensagem ? `<p>"${foto.mensagem}"</p>` : ''}
           </div>
         `;
@@ -178,6 +62,3 @@
 
     carregarGaleriaCarrossel();
   </script>
-
-</body>
-</html>
