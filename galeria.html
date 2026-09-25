@@ -79,7 +79,7 @@
       bottom: 30px;
       left: 20px;
       right: 20px;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.75);
       padding: 15px;
       border-radius: 8px;
       border-left: 4px solid #bfa15f;
@@ -98,7 +98,6 @@
       color: #ccc;
     }
 
-    /* Estilo dos botões de emoji já incluído aqui */
     .btn-emoji {
       background: rgba(255, 255, 255, 0.15);
       border: none;
@@ -123,7 +122,7 @@
       align-items: center;
       height: 100%;
       text-align: center;
-      color: #ff6b6b;
+      color: #aaa;
       padding: 20px;
       font-size: 14px;
       line-height: 1.5;
@@ -138,14 +137,14 @@
   </div>
 
   <div id="galeriaContainer" class="carousel-container">
-    <div class="mensagem-aviso" style="color: #aaa;">A inicializar sistema...</div>
+    <div class="mensagem-aviso">A carregar galeria...</div>
   </div>
 
   <script>
     window.onerror = function(msg, url, line) {
       const container = document.getElementById('galeriaContainer');
       if (container) {
-        container.innerHTML = `<div class="mensagem-aviso"><strong>Erro detetado:</strong><br>${msg}<br><small>Linha: ${line}</small></div>`;
+        container.innerHTML = `<div class="mensagem-aviso" style="color: #ff6b6b;"><strong>Erro detetado:</strong><br>${msg}<br><small>Linha: ${line}</small></div>`;
       }
       return true;
     };
@@ -161,52 +160,59 @@
     async function iniciarGaleria() {
       const container = document.getElementById('galeriaContainer');
 
-      const { data: fotos, error } = await supabase
-        .from('fotos')
-        .select('*');
+      try {
+        // Busca apenas as fotografias cujo estado está aprovado (ignora maiúsculas/minúsculas)
+        const { data: fotos, error } = await supabase
+          .from('fotos')
+          .select('*')
+          .ilike('status', 'APROVADO');
 
-      if (error) {
-        container.innerHTML = `<div class="mensagem-aviso">Erro na base de dados:<br>${error.message}</div>`;
-        return;
-      }
+        if (error) {
+          container.innerHTML = `<div class="mensagem-aviso" style="color: #ff6b6b;">Erro na base de dados:<br>${error.message}</div>`;
+          return;
+        }
 
-      if (!fotos || fotos.length === 0) {
-        container.innerHTML = `<div class="mensagem-aviso" style="color: #aaa;">Ainda não existem fotografias registadas na base de dados.</div>`;
-        return;
-      }
+        if (!fotos || fotos.length === 0) {
+          container.innerHTML = `<div class="mensagem-aviso">A aguardar a aprovação de novas fotografias no painel de administração.</div>`;
+          return;
+        }
 
-      container.innerHTML = '';
+        container.innerHTML = '';
 
-      fotos.forEach(foto => {
-        const slide = document.createElement('div');
-        slide.className = 'carousel-slide';
-        
-        const lCoracao = foto.likes_coracao || 0;
-        const lPalmas = foto.likes_palmas || 0;
-        const lFesta = foto.likes_festa || 0;
-        
-        slide.innerHTML = `
-          <img src="${foto.url_imagem}" alt="Foto">
-          <div class="foto-overlay">
-            <h3>${foto.nome_autor || 'Convidado'} <span style="font-size: 11px; color: #bfa15f;">(${foto.relacao || ''})</span></h3>
-            ${foto.mensagem ? `<p style="margin-bottom: 8px;">"${foto.mensagem}"</p>` : ''}
-            
-            <div style="display: flex; gap: 10px; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 8px;">
-              <button class="btn-emoji" onclick="darLike('${foto.id}', 'coracao', this)">
-                ❤️ <span id="count-coracao-${foto.id}">${lCoracao}</span>
-              </button>
-              <button class="btn-emoji" onclick="darLike('${foto.id}', 'palmas', this)">
-                👏 <span id="count-palmas-${foto.id}">${lPalmas}</span>
-              </button>
-              <button class="btn-emoji" onclick="darLike('${foto.id}', 'festa', this)">
-                🥳 <span id="count-festa-${foto.id}">${lFesta}</span>
-              </button>
+        fotos.forEach(foto => {
+          const slide = document.createElement('div');
+          slide.className = 'carousel-slide';
+          
+          const lCoracao = foto.likes_coracao || 0;
+          const lPalmas = foto.likes_palmas || 0;
+          const lFesta = foto.likes_festa || 0;
+          
+          slide.innerHTML = `
+            <img src="${foto.url_imagem}" alt="Foto">
+            <div class="foto-overlay">
+              <h3>${foto.nome_autor || 'Convidado'} <span style="font-size: 11px; color: #bfa15f;">(${foto.relacao || ''})</span></h3>
+              ${foto.mensagem ? `<p style="margin-bottom: 8px;">"${foto.mensagem}"</p>` : ''}
+              
+              <div style="display: flex; gap: 10px; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 8px;">
+                <button class="btn-emoji" onclick="darLike('${foto.id}', 'coracao', this)">
+                  ❤️ <span id="count-coracao-${foto.id}">${lCoracao}</span>
+                </button>
+                <button class="btn-emoji" onclick="darLike('${foto.id}', 'palmas', this)">
+                  👏 <span id="count-palmas-${foto.id}">${lPalmas}</span>
+                </button>
+                <button class="btn-emoji" onclick="darLike('${foto.id}', 'festa', this)">
+                  🥳 <span id="count-festa-${foto.id}">${lFesta}</span>
+                </button>
+              </div>
             </div>
-          </div>
-        `;
-        
-        container.appendChild(slide);
-      });
+          `;
+          
+          container.appendChild(slide);
+        });
+
+      } catch (err) {
+        container.innerHTML = `<div class="mensagem-aviso" style="color: #ff6b6b;">Erro inesperado:<br>${err.message}</div>`;
+      }
     }
 
     window.darLike = async function(idFoto, tipo, btnElement) {
