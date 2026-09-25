@@ -80,7 +80,7 @@
       left: 20px;
       right: 20px;
       background: rgba(0, 0, 0, 0.7);
-      padding: 12px 15px;
+      padding: 15px;
       border-radius: 8px;
       border-left: 4px solid #bfa15f;
       max-width: 400px;
@@ -96,6 +96,24 @@
       margin: 0;
       font-size: 12px;
       color: #ccc;
+    }
+
+    /* Estilo dos botões de emoji já incluído aqui */
+    .btn-emoji {
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      padding: 6px 12px;
+      border-radius: 20px;
+      color: white;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .btn-emoji:hover {
+      background: rgba(255, 255, 255, 0.3);
     }
 
     .mensagem-aviso {
@@ -124,7 +142,6 @@
   </div>
 
   <script>
-    // Captura qualquer erro global no ecran para nunca mais ficar em branco
     window.onerror = function(msg, url, line) {
       const container = document.getElementById('galeriaContainer');
       if (container) {
@@ -164,17 +181,56 @@
         const slide = document.createElement('div');
         slide.className = 'carousel-slide';
         
+        const lCoracao = foto.likes_coracao || 0;
+        const lPalmas = foto.likes_palmas || 0;
+        const lFesta = foto.likes_festa || 0;
+        
         slide.innerHTML = `
           <img src="${foto.url_imagem}" alt="Foto">
           <div class="foto-overlay">
             <h3>${foto.nome_autor || 'Convidado'} <span style="font-size: 11px; color: #bfa15f;">(${foto.relacao || ''})</span></h3>
-            ${foto.mensagem ? `<p>"${foto.mensagem}"</p>` : ''}
+            ${foto.mensagem ? `<p style="margin-bottom: 8px;">"${foto.mensagem}"</p>` : ''}
+            
+            <div style="display: flex; gap: 10px; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 8px;">
+              <button class="btn-emoji" onclick="darLike('${foto.id}', 'coracao', this)">
+                ❤️ <span id="count-coracao-${foto.id}">${lCoracao}</span>
+              </button>
+              <button class="btn-emoji" onclick="darLike('${foto.id}', 'palmas', this)">
+                👏 <span id="count-palmas-${foto.id}">${lPalmas}</span>
+              </button>
+              <button class="btn-emoji" onclick="darLike('${foto.id}', 'festa', this)">
+                🥳 <span id="count-festa-${foto.id}">${lFesta}</span>
+              </button>
+            </div>
           </div>
         `;
         
         container.appendChild(slide);
       });
     }
+
+    window.darLike = async function(idFoto, tipo, btnElement) {
+      btnElement.style.transform = 'scale(1.2)';
+      setTimeout(() => btnElement.style.transform = 'scale(1)', 200);
+
+      const spanCount = document.getElementById(`count-${tipo}-${idFoto}`);
+      let atual = parseInt(spanCount.innerText) || 0;
+      atual += 1;
+      spanCount.innerText = atual;
+
+      let coluna = 'likes_coracao';
+      if (tipo === 'palmas') coluna = 'likes_palmas';
+      if (tipo === 'festa') coluna = 'likes_festa';
+
+      const { error } = await supabase
+        .from('fotos')
+        .update({ [coluna]: atual })
+        .eq('id', idFoto);
+
+      if (error) {
+        console.error("Erro ao atualizar like:", error.message);
+      }
+    };
 
     iniciarGaleria();
   </script>
