@@ -143,23 +143,6 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_7Zq0QtvSeiXAZsOCIOptNw_rdeqzR8w';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Função auxiliar para carregar a imagem e testar se é formato retrato
-    function verificarRetrato(foto) {
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.src = foto.url_imagem;
-        img.onload = () => {
-          // Retrato: Altura maior que a largura
-          if (img.naturalHeight > img.naturalWidth) {
-            resolve(foto);
-          } else {
-            resolve(null);
-          }
-        };
-        img.onerror = () => resolve(null); // Ignora se houver erro ao carregar o link
-      });
-    }
-
     async function carregarGaleriaCarrossel() {
       const container = document.getElementById('galeriaContainer');
 
@@ -174,22 +157,10 @@
         return;
       }
 
-      // Valida todas as imagens em paralelo
-      const promessas = fotos.map(foto => verificarRetrato(foto));
-      const resultados = await Promise.all(promessas);
-      
-      // Filtra apenas os objetos válidos (que passaram na verificação de retrato)
-      const fotosRetrato = resultados.filter(item => item !== null);
-
-      if (fotosRetrato.length === 0) {
-        container.innerHTML = '<div class="sem-fotos"><h2>A aguardar fotografias em formato retrato.</h2><p>As fotos enviadas precisam de estar na vertical.</p></div>';
-        return;
-      }
-
       container.innerHTML = '';
 
-      // Monta os slides no carrossel
-      fotosRetrato.forEach(foto => {
+      // Renderiza todas as fotos aprovadas diretamente no carrossel
+      fotos.forEach(foto => {
         const slide = document.createElement('div');
         slide.className = 'carousel-slide';
         
