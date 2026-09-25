@@ -3,109 +3,141 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Álbum da Festa - 76 Anos Nilda & Clóvis</title>
+  <title>Galeria da Festa - 76 Anos Nilda & Clóvis</title>
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #fcf8f2;
-      color: #333;
+    body, html {
       margin: 0;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .container {
-      max-width: 900px;
+      padding: 0;
       width: 100%;
+      height: 100%;
+      background-color: #000000;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+      color: #fff;
     }
-    h1 {
-      text-align: center;
-      color: #bfa15f;
-      margin-bottom: 5px;
+
+    /* Botão de voltar no canto superior */
+    .top-bar {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
     }
-    p.subtitle {
-      text-align: center;
-      color: #666;
-      margin-bottom: 30px;
-    }
-    .voltar-link {
-      display: inline-block;
-      margin-bottom: 20px;
-      color: #bfa15f;
+
+    .btn-voltar {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
       text-decoration: none;
+      font-size: 14px;
+      backdrop-filter: blur(5px);
+      transition: background 0.3s;
+    }
+
+    .btn-voltar:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .titulo-topo {
+      font-size: 14px;
+      color: #bfa15f;
       font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
-    .voltar-link:hover {
-      text-decoration: underline;
-    }
-    .galeria-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-    }
-    .card {
-      background: #ffffff;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+
+    /* Contentor do Carrossel */
+    .carousel-container {
       display: flex;
-      flex-direction: column;
-    }
-    /* Contenedor da imagem com fundo elegante para não cortar nada */
-    .img-container {
       width: 100%;
-      height: 250px;
-      background-color: #1a1a1a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
+      height: 100%;
+      overflow-x: scroll;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
     }
-    .card img {
+
+    .carousel-container::-webkit-scrollbar {
+      display: none; /* Esconde a barra de scroll */
+    }
+
+    /* Cada slide de foto ocupa a tela inteira */
+    .carousel-slide {
+      flex: 0 0 100%;
+      width: 100%;
+      height: 100%;
+      scroll-snap-align: start;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      box-sizing: border-box;
+      padding: 60px 20px 40px 20px;
+    }
+
+    .carousel-slide img {
       max-width: 100%;
       max-height: 100%;
-      object-fit: contain; /* Garante que a foto aparece inteira, sem cortes */
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
     }
-    .card-content {
-      padding: 15px;
+
+    /* Legenda elegante sobreposta na parte inferior da foto */
+    .foto-overlay {
+      position: absolute;
+      bottom: 40px;
+      left: 30px;
+      right: 30px;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      padding: 15px 20px;
+      border-radius: 10px;
+      border-left: 4px solid #bfa15f;
+      max-width: 450px;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+
+    .foto-overlay h3 {
+      margin: 0 0 5px 0;
+      font-size: 16px;
+      color: #fff;
+    }
+
+    .foto-overlay p {
+      margin: 0;
+      font-size: 13px;
+      color: #ddd;
+      font-style: italic;
+    }
+
+    .sem-fotos {
       display: flex;
       flex-direction: column;
-      flex-grow: 1;
-    }
-    .card-content p {
-      margin: 0 0 10px 0;
-      font-size: 14px;
-      color: #555;
-    }
-    .autor {
-      font-weight: bold;
-      color: #333;
-    }
-    .relacao {
-      font-size: 12px;
-      color: #888;
-      margin-bottom: 8px;
-    }
-    .sem-fotos {
+      justify-content: center;
+      align-items: center;
+      height: 100%;
       text-align: center;
-      grid-column: 1 / -1;
       color: #888;
-      padding: 40px;
-      font-size: 16px;
+      padding: 20px;
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <a href="index.html" class="voltar-link">&larr; Voltar para a página de envio</a>
-    <h1>Álbum de Memórias</h1>
-    <p class="subtitle">Momentos especiais partilhados na festa de 76 Anos de Nilda & Clóvis</p>
+  <div class="top-bar">
+    <a href="index.html" class="btn-voltar">← Enviar Foto</a>
+    <div class="titulo-topo">Álbum 76 Anos</div>
+  </div>
 
-    <div id="galeriaGrid" class="galeria-grid">
-      <div class="sem-fotos">A carregar fotografias...</div>
-    </div>
+  <div id="galeriaContainer" class="carousel-container">
+    <div class="sem-fotos">A carregar momentos especiais...</div>
   </div>
 
   <script type="module">
@@ -115,49 +147,58 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_7Zq0QtvSeiXAZsOCIOptNw_rdeqzR8w';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    async function carregarGaleria() {
-      const grid = document.getElementById('galeriaGrid');
+    async function carregarGaleriaCarrossel() {
+      const container = document.getElementById('galeriaContainer');
 
+      // Puxa apenas as fotos aprovadas
       const { data: fotos, error } = await supabase
         .from('fotos')
         .select('*')
         .eq('status', 'APROVADO')
-        .order('created_at', { ascending: false });
+        .order('criado_em', { ascending: false });
 
-      if (error) {
-        grid.innerHTML = `<div class="sem-fotos">Erro ao carregar o álbum: ${error.message}</div>`;
+      if (error || !fotos || fotos.length === 0) {
+        container.innerHTML = '<div class="sem-fotos"><h2>Ainda não há fotografias aprovadas.</h2><p>Seja o primeiro a enviar um momento da festa!</p></div>';
         return;
       }
 
-      if (!fotos || fotos.length === 0) {
-        grid.innerHTML = `<div class="sem-fotos">Ainda não existem fotografias aprovadas no álbum. Volte em breve!</div>`;
-        return;
-      }
+      container.innerHTML = '';
+      let fotosValidasCount = 0;
 
-      grid.innerHTML = '';
       fotos.forEach(foto => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-          <div class="img-container">
-            <img src="${foto.url_imagem}" alt="Foto da Festa">
-          </div>
-          <div class="card-content">
-            <span class="autor">${escapeHtml(foto.nome_autor)}</span>
-            <span class="relacao">${escapeHtml(foto.relacao || 'Convidado(a)')}</span>
-            <p>${foto.mensagem ? escapeHtml(foto.mensagem) : ''}</p>
-          </div>
-        `;
-        grid.appendChild(card);
+        const imgTest = new Image();
+        imgTest.src = foto.url_imagem;
+
+        imgTest.onload = function() {
+          // Filtra estritamente para formato retrato (altura maior que largura)
+          if (imgTest.naturalHeight > imgTest.naturalWidth) {
+            fotosValidasCount++;
+
+            const slide = document.createElement('div');
+            slide.className = 'carousel-slide';
+            
+            slide.innerHTML = `
+              <img src="${foto.url_imagem}" alt="Foto de ${foto.nome_autor}">
+              <div class="foto-overlay">
+                <h3>${foto.nome_autor} <span style="font-weight: normal; font-size: 12px; color: #bfa15f;">(${foto.relacao})</span></h3>
+                ${foto.mensagem ? `<p>"${foto.mensagem}"</p>` : ''}
+              </div>
+            `;
+            
+            container.appendChild(slide);
+          }
+        };
       });
+
+      // Caso nenhuma foto atenda ao critério após processar
+      setTimeout(() => {
+        if (fotosValidasCount === 0 && container.innerHTML === '') {
+          container.innerHTML = '<div class="sem-fotos"><h2>A aguardar fotografias em formato retrato.</h2></div>';
+        }
+      }, 2000);
     }
 
-    function escapeHtml(text) {
-      if (!text) return '';
-      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-    }
-
-    carregarGaleria();
+    carregarGaleriaCarrossel();
   </script>
 
 </body>
